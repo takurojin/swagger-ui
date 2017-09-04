@@ -105,24 +105,30 @@ export default class Topbar extends React.Component {
     let control = []
     let formOnSubmit = null
 
-    if(urls) {
-      let rows = []
-      urls.forEach((link, i) => {
-        rows.push(<option key={i} value={link.url}>{link.name}</option>)
-      })
+    // modified by Felix Song
+    // disable Top Control
+    if (process.env.DISABLE_CUSTOMIZATION === true) {
+      if (urls) {
+        let rows = []
+        urls.forEach((link, i) => {
+          rows.push(<option key={i} value={link.url}>{link.name}</option>)
+        })
 
-      control.push(
-        <label className="select-label" htmlFor="select"><span>Select a spec</span>
-          <select id="select" disabled={isLoading} onChange={ this.onUrlSelect } value={urls[this.state.selectedIndex].url}>
-            {rows}
-          </select>
-        </label>
-      )
-    }
-    else {
-      formOnSubmit = this.downloadUrl
-      control.push(<input className="download-url-input" type="text" onChange={ this.onUrlChange } value={this.state.url} disabled={isLoading} style={inputStyle} />)
-      control.push(<Button className="download-url-button" onClick={ this.downloadUrl }>Explore</Button>)
+        control.push(
+          <label className="select-label" htmlFor="select"><span>Select a spec</span>
+            <select id="select" disabled={isLoading} onChange={this.onUrlSelect}
+                    value={urls[this.state.selectedIndex].url}>
+              {rows}
+            </select>
+          </label>
+        )
+      }
+      else {
+        formOnSubmit = this.downloadUrl
+        control.push(<input className="download-url-input" type="text" onChange={this.onUrlChange}
+                            value={this.state.url} disabled={isLoading} style={inputStyle}/>)
+        control.push(<Button className="download-url-button" onClick={this.downloadUrl}>Explore</Button>)
+      }
     }
 
     return (
