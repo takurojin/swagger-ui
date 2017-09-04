@@ -20,17 +20,26 @@ export default class AuthorizeBtn extends React.Component {
     let showPopup = !!authSelectors.shownDefinitions()
     let isAuthorized = !!authSelectors.authorized().size
 
-    return (
-      <div className="auth-wrapper">
-        <button className={isAuthorized ? "btn authorize locked" : "btn authorize unlocked"} onClick={ this.onClick }>
-          <span>Authorize</span>
-          <svg width="20" height="20">
-            <use href={ isAuthorized ? "#locked" : "#unlocked" } xlinkHref={ isAuthorized ? "#locked" : "#unlocked" } />
-          </svg>
-        </button>
-      { showPopup && <AuthorizationPopup /> }
-      </div>
-    )
+    // modified by Felix Song
+    // disable Authorize Button
+    if (process.env.DISABLE_CUSTOMIZATION === true) {
+      return (
+        <div className="auth-wrapper">
+          <button className={isAuthorized ? "btn authorize locked" : "btn authorize unlocked"} onClick={this.onClick}>
+            <span>Authorize</span>
+            <svg width="20" height="20">
+              <use href={isAuthorized ? "#locked" : "#unlocked"} xlinkHref={isAuthorized ? "#locked" : "#unlocked"}/>
+            </svg>
+          </button>
+          {showPopup && <AuthorizationPopup/>}
+        </div>
+      )
+    } else {
+      return (
+        <div className="auth-wrapper">
+        </div>
+      );
+    }
   }
 
 
