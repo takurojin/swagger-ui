@@ -237,7 +237,7 @@ export const executeRequest = (req) => ({fn, specActions, specSelectors, getConf
       specActions.setResponse(req.pathName, req.method, res)
     }).catch(err => specActions.setResponse(req.pathName, req.method, { error: true, err: serializeError(err) }))
   } else {
-    return excuteForMelon(req, fn).then(res => {
+    return executeForMelon(req, fn).then(res => {
       res.duration = Date.now() - startTime
       specActions.setResponse(req.pathName, req.method, res)
     }).catch(err => specActions.setResponse(req.pathName, req.method, { error: true, err: serializeError(err) }))
@@ -282,7 +282,7 @@ export function setScheme (scheme, path, method) {
 // Customized for Melon
 
 // Scratching From https://github.com/swagger-api/swagger-js/blob/v3.0.20/src/execute.js -> function execute();
-const excuteForMelon = ({
+const executeForMelon = ({
                           http: userHttp,
                           fetch, // This is legacy
                           spec,
@@ -310,7 +310,6 @@ const excuteForMelon = ({
     request.body = JSON.stringify(request.body)
   }
 
-  console.log(request)
   // Build request and execute it
   return userHttp(request)
 }

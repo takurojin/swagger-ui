@@ -50,8 +50,8 @@ module.exports = require("./make-webpack-config.js")(rules, {
     publicPath: "/dist",
     library: "SwaggerUICore",
     libraryTarget: "umd",
-    filename: "[name].js",
-    chunkFilename: "js/[name].js",
+    filename: "[name].[chunkhash].js",
+    chunkFilename: "js/[name].[chunkhash].js",
   },
 
 })
