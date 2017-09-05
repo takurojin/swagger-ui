@@ -303,7 +303,7 @@ const executeForMelon = ({
   const request = fn.buildRequest({spec, operationId, parameters, securities, ...extras})
 
   if (request.url) {
-    request.url = EXECUTE_BASE_URI + '?target=' + request.url
+    request.url = EXECUTE_BASE_URI + '?target=' + encodeURIComponent(request.url)
   }
 
   if (request.body && (isPlainObject(request.body) || isArray(request.body))) {
