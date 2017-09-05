@@ -207,6 +207,11 @@ export const executeRequest = (req) => ({fn, specActions, specSelectors, getConf
   // if url is relative, parseUrl makes it absolute by inferring from `window.location`
   req.contextUrl = parseUrl(specSelectors.url()).toString()
 
+  req.scheme = 'http'
+  if(req.spec && req.spec.info && req.spec.info.termsOfService.startsWith('https://')) {
+    req.scheme = 'https'
+  }
+
   if(op && op.operationId) {
     req.operationId = op.operationId
   } else if(op && pathName && method) {
@@ -230,6 +235,8 @@ export const executeRequest = (req) => ({fn, specActions, specSelectors, getConf
 
   // track duration of request
   const startTime = Date.now()
+
+  console.log(req)
 
   if (process.env.DISABLE_CUSTOMIZATION === true) {
     return fn.execute(req).then(res => {
