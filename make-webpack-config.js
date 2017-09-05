@@ -84,7 +84,8 @@ module.exports = function(rules, options) {
     new webpack.DefinePlugin({
       "process.env": {
         NODE_ENV:  specialOptions.minimize ? JSON.stringify("production") : null,
-        WEBPACK_INLINE_STYLES: !specialOptions.separateStylesheets
+        WEBPACK_INLINE_STYLES: !specialOptions.separateStylesheets,
+        DISABLE_CUSTOMIZATION: true
       },
       "buildInfo": JSON.stringify({
         PACKAGE_VERSION: (pkg.version),

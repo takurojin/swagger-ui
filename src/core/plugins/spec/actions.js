@@ -1,6 +1,9 @@
 import YAML from "js-yaml"
 import parseUrl from "url-parse"
 import serializeError from "serialize-error"
+import isPlainObject from 'lodash/isPlainObject'
+import isArray from 'lodash/isArray'
+import { EXECUTE_BASE_URI } from '../../presets/melon'
 
 // Actions conform to FSA (flux-standard-actions)
 // {type: string,payload: Any|Error, meta: obj, error: bool}
@@ -204,7 +207,6 @@ export const executeRequest = (req) => ({fn, specActions, specSelectors, getConf
   // if url is relative, parseUrl makes it absolute by inferring from `window.location`
   req.contextUrl = parseUrl(specSelectors.url()).toString()
 
-
   if(op && op.operationId) {
     req.operationId = op.operationId
   } else if(op && pathName && method) {
@@ -229,12 +231,18 @@ export const executeRequest = (req) => ({fn, specActions, specSelectors, getConf
   // track duration of request
   const startTime = Date.now()
 
-  return fn.execute(req)
-  .then( res => {
-    res.duration = Date.now() - startTime
-    specActions.setResponse(req.pathName, req.method, res)
-  } )
-  .catch( err => specActions.setResponse(req.pathName, req.method, { error: true, err: serializeError(err) } ) )
+  if (process.env.DISABLE_CUSTOMIZATION === true) {
+    return fn.execute(req).then(res => {
+      res.duration = Date.now() - startTime
+      specActions.setResponse(req.pathName, req.method, res)
+    }).catch(err => specActions.setResponse(req.pathName, req.method, { error: true, err: serializeError(err) }))
+  } else {
+    return excuteForMelon(req, fn).then(res => {
+      res.duration = Date.now() - startTime
+      specActions.setResponse(req.pathName, req.method, res)
+    }).catch(err => specActions.setResponse(req.pathName, req.method, { error: true, err: serializeError(err) }))
+  }
+
 }
 
 
@@ -269,4 +277,44 @@ export function setScheme (scheme, path, method) {
     type: SET_SCHEME,
     payload: { scheme, path, method }
   }
+}
+
+// Customized for Melon
+
+// Scratching From https://github.com/swagger-api/swagger-js/blob/v3.0.20/src/execute.js -> function execute();
+const excuteForMelon = ({
+                          http: userHttp,
+                          fetch, // This is legacy
+                          spec,
+                          operationId,
+                          pathName,
+                          method,
+                          parameters,
+                          securities,
+                          ...extras
+                        }, fn) => {
+  // Provide default fetch implementation
+  userHttp = userHttp || fetch || http // Default to _our_ http
+
+  if (pathName && method && !operationId) {
+    operationId = legacyIdFromPathMethod(pathName, method)
+  }
+
+  const request = fn.buildRequest({spec, operationId, parameters, securities, ...extras})
+
+  if (request.url) {
+    request.url = EXECUTE_BASE_URI + '?target=' + request.url
+  }
+
+  if (request.body && (isPlainObject(request.body) || isArray(request.body))) {
+    request.body = JSON.stringify(request.body)
+  }
+
+  console.log(request)
+  // Build request and execute it
+  return userHttp(request)
+}
+
+const legacyIdFromPathMethod = (pathName, method) => {
+  return `${method.toLowerCase()}-${pathName}`
 }
